@@ -6,16 +6,42 @@ name: CI
 on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
+        inputs:
+            args:
+                description: 'args to run'
+                required: true
+                default: '--user_name="NAME" --user_email="TEST@TEST.TEST" --repository="git@github.com:test/test.git" --branch="TEST"'
+            SSH_PRIVATE_KEY_TEMP:
+                description: 'args to run'
+                required: false
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
+
 jobs:
-  # This workflow contains a single job called "build"
-  build:
-    # The type of runner that the job will run on
+  run_python_script:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
         with:
-          python-version: '3.10' 
-      - run: python contribute.py
+          python-version: '3.10' # Укажите версию Python, которую хотите использовать
+
+      - name: Install dependencies
+        run: pip install gitpython # Установка библиотеки GitPython для доступа к командам git
+
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ github.event.inputs.SSH_PRIVATE_KEY_TEMP || secrets.SSH_PRIVATE_KEY  }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+
+      - name: Run Python script
+        env:
+            GIT_SSH_COMMAND: 'ssh -i ~/.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'  
+        run: python contribute.py ${{github.event.inputs.args}}
+      
