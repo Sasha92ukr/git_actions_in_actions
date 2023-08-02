@@ -1,0 +1,21 @@
+name: Manual Jobs Execution
+
+on:
+  workflow_dispatch: # Триггер для ручного запуска workflow
+
+jobs:
+  jobs1:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Step 1 for Jobs 1
+        run: echo "Step 1 for Jobs 1"
+
+      # ... дополнительные шаги для Jobs 1 ...
+
+  jobs2:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Step 1 for Jobs 2
+        run: echo "Step 1 for Jobs 2"
+
+      # ... дополнительные шаги для Jobs 2 ...
